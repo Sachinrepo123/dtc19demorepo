@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple 3D Website</title>
+    <style>
+        body { 
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            z-index: 100;
+            pointer-events: none;
+        }
+        #menu {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+        }
+        button {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid white;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>Welcome to My 3D Website</h1>
+        <p>A simple demonstration of 3D on the web</p>
+    </div>
+    
+    <div id="menu">
+        <button id="addCube">Add Cube</button>
+        <button id="changeColor">Change Color</button>
+        <button id="rotateToggle">Toggle Rotation</button>
+    </div>
+
+    <!-- Import Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // Basic Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x111111);
+        document.body.appendChild(renderer.domElement);
+        
+        // Add some lights
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        // Create a cube
+        let cube;
+        function createCube() {
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshPhongMaterial({ 
+                color: Math.random() * 0xffffff,
+                shininess: 100
+            });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+        }
+        
+        createCube();
+        
+        camera.position.z = 5;
+        
+        // Animation variables
+        let rotateEnabled = true;
+        let cubes = [];
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (rotateEnabled && cube) {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        // Event listeners for buttons
+        document.getElementById('addCube').addEventListener('click', function() {
+            const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: Math.random() * 0xffffff 
+            });
+            const newCube = new THREE.Mesh(geometry, material);
+            
+            // Random position
+            newCube.position.x = (Math.random() - 0.5) * 5;
+            newCube.position.y = (Math.random() - 0.5) * 5;
+            newCube.position.z = (Math.random() - 0.5) * 5;
+            
+            scene.add(newCube);
+            cubes.push(newCube);
+        });
+        
+        document.getElementById('changeColor').addEventListener('click', function() {
+            if (cube) {
+                cube.material.color.setHex(Math.random() * 0xffffff);
+            }
+        });
+        
+        document.getElementById('rotateToggle').addEventListener('click', function() {
+            rotateEnabled = !rotateEnabled;
+            this.textContent = rotateEnabled ? 'Stop Rotation' : 'Start Rotation';
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
